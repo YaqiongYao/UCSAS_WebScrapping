@@ -1,5 +1,5 @@
 ---
-title: "Web Scraping for Sports Data"
+title: "Web Scraping for Sports Data with R"
 author: "Yaqiong Yao"
 date: "10/1/2020"
 output:
@@ -236,7 +236,7 @@ head(elo_class[[1]])
 
 * **RSelenium** package helps this automating process by providing connection to Selenium Server.
 
-* Install package
+* Install **RSelenium** package.
 
 \footnotesize
 ```{r eval=FALSE, message=FALSE, warning=FALSE, echo = TRUE}
@@ -278,6 +278,133 @@ remDr$close()
 \normalsize
 
 ## Web Scraping for Dynamic Data in R
+
+* Frequently used functions of **RSelenium**:
+
+  - rsDriver() : start a selenium server
+  - navigate() : navigate web pages
+  - findElements() : find elements by CSS seclector or XPATH
+  - getPageSource() : get current page source
+  - clickElement() : click element
+  
+* Please go to [RSelenium cran](https://cran.r-project.org/web/packages/RSelenium/RSelenium.pdf) for more details.
+
+## Web Scraping for Dynamic Data in R
+
+Exercise: Web Scraping for the history basketball recording of UConn
+
+https://www.flashscore.com/team/connecticut-huskies/8rqVf3Tj/results/
+
+* Start a selenium server and open web brower.
+
+\footnotesize
+```{r eval=FALSE, message=FALSE, warning=FALSE, echo = TRUE}
+require("RSelenium")
+rD <- rsDriver(port = 5533L, chromever = "85.0.4183.87")
+remDr <- rD$client
+url <- "https://www.flashscore.com/team/connecticut-huskies/8rqVf3Tj/results/#"
+remDr$navigate(url)
+```
+\normalsize
+
+## Web Scraping for Dynamic Data in R
+
+* Automate to click all "show more results".
+
+\footnotesize
+```{r eval=FALSE, message=FALSE, warning=FALSE, echo = TRUE}
+repeat{
+  x <- try(webElemMore <- 
+             remDr$findElement(using = 'xpath', 
+                               '//*[@id="live-table"]/div[1]/div/div/a'),
+           silent=T)
+  if (inherits(x, "try-error")) break
+  webElemMore$clickElement()
+}
+```
+\normalsize
+
+* Extract data, such as time, home/away, score and result.
+
+\footnotesize
+```{r eval=FALSE, message=FALSE, warning=FALSE, echo = TRUE}
+webElemTime <- remDr$findElements(using = 'xpath', 
+                              '//*[@class="event__time"]')
+webElemTime <- 
+  unlist(lapply(webElemTime, function(x){x$getElementText()}))
+webElemTime <- gsub("\\n", " ", webElemTime)
+```
+\normalsize
+
+## Web Scraping for Dynamic Data in R
+
+\footnotesize
+```{r eval=FALSE, message=FALSE, warning=FALSE, echo = TRUE}
+webElemHome <- 
+  remDr$findElements(using = 'class', 
+                     'event__participant')
+webElemHome <- 
+  unlist(lapply(webElemHome, function(x){x$getElementText()}))
+
+webElemScore <- 
+  remDr$findElements(using = 'class', 'event__score')
+webElemScore <- 
+  unlist(lapply(webElemScore, function(x){x$getElementText()}))
+
+webElemResult <- 
+  remDr$findElements(using = 'class', 'wld')
+webElemResult <- 
+  unlist(lapply(webElemResult, function(x){x$getElementText()}))
+```
+\normalsize
+
+## Web Scraping for Dynamic Data in R
+
+* Organize dataset.
+
+\footnotesize
+```{r eval=FALSE, message=FALSE, warning=FALSE, echo = TRUE}
+n <- length(webElemHome)
+basketball <- 
+  data.frame(time = webElemTime,
+             Home = webElemHome[seq(n) %% 2 == 1],
+             Away = webElemHome[seq(n) %% 2 == 0],
+             HomeS = webElemScore[seq(n) %% 2 == 1],
+             AwayS = webElemScore[seq(n) %% 2 == 0],
+             Result = webElemResult)
+
+head(basketball)
+remDr$close()
+```
+\normalsize
+
+![](figures/uconn.png)
+
+## Summary
+
+* For different kinds of data, we need to use different web scraping techiniques with R.
+
+* One can simply use **read.csv** or related functions to directly import organized files from web pages.
+
+* The static data can be extract with the help of **rvest**.
+
+* We could use **RSelenium** to parse the dynamic data.
+
+
+
+## Resources
+
+- [CSS and HTML crash course](http://flukeout.github.io/)
+
+- [rvest](https://cran.r-project.org/web/packages/rvest/rvest.pdf)
+
+- [RSelenium](https://cran.r-project.org/web/packages/RSelenium/vignettes/basics.html)
+
+- [R task view: web technology](https://cran.r-project.org/web/views/WebTechnologies.html)
+
+
+
+
 
 
 
