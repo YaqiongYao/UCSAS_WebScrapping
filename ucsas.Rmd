@@ -403,8 +403,9 @@ remDr$close()
 - [R task view: web technology](https://cran.r-project.org/web/views/WebTechnologies.html)
 
 
+## Acknowledgement
 
-
+The slides are modified from [Dr. Kovalchik's material](https://github.com/skoval/UseRSportTutorial) and [Wanwan Xu's slides](https://github.com/wanwanx/WebScraping_UCSAS).
 
 
 
