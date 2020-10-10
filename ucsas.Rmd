@@ -21,7 +21,7 @@ require("RSelenium")
 <!--   + Prerequisite -->
 <!--   + Motivation of Web Scraping -->
 
-* Using R
+* Web Scraping Techniques Using R
 
   + Import files downloaded from websites
   + Static data
@@ -48,7 +48,7 @@ require("RSelenium")
 
 [College basketball school index](https://www.sports-reference.com/cbb/schools/)
 
-* These data can be obtained by copy and paste manully.
+* These data can be obtained by copying and pasting manully.
 
 * Web scraping technique helps capture the data efficiently.
 
@@ -56,7 +56,7 @@ require("RSelenium")
 
 ## Web Scraping Using R
 
-* Different web scraping techniques are required to deal with different situations of data in R.
+* Different web scraping techniques are required when we are facing different kinds of data.
 
 * Data have been organized into files.
 
@@ -85,7 +85,7 @@ str(tennis_aus)
 
 * Most of data in the web are not organized into files, which can be directly imported into R.
 
-* Before we capture these data, we need to determined whether the data is static or dynamic based on the source code. 
+* Before we capture these data, we need to determine whether the data are static or dynamic based on the source code.
 
 * Static data is the data that can be seen in the source code.
 
@@ -103,7 +103,7 @@ Exerciese: Determine what kind of the data are in the following examples, static
 
 * http://tennisabstract.com/reports/atp_elo_ratings.html
 
-* https://www.espncricinfo.com/ci/content/stats/
+* https://www.flashscore.com/team/connecticut-huskies/8rqVf3Tj/results/
 
 
 ## Static Data and Dynamic Data
@@ -114,16 +114,16 @@ This is static data.
 
 ## Static Data and Dynamic Data
 
-![](figures/espn.png)
+![](figures/uconnbasketball.png)
 
 This is dynamic data.
 
 
 ## Web Scraping for Static Data in R
 
-R provides several approaches for web scraping static data. Two of them will be discussed in this workshop.
+R provides several approaches for web scraping the static data. Two of them will be discussed in this workshop.
 
-* **readLines** function: Read the source code of the HTML page.
+* **readLines** function: Read the source code of the HTML pages.
 
 * **rvest** package: Capture useful data by identifying the elements contains the data in the source code. 
 
@@ -150,9 +150,9 @@ Before we talk about web scraping by **rvest** package, we need to know how to l
 
 * Right click the page and choose "Inspect".
 
-* Clike "Select an element in the page to inspect it".
+* Click "Select an element in the page to inspect it".
 
-* We can locate the element by CSS selector or XPATH.
+* We can locate the elements by CSS selector or XPATH.
 
 ## Web Scraping for Static Data in R
 
@@ -230,7 +230,7 @@ head(elo_class[[1]])
 
 ## Web Scraping for Dynamic Data in R
 
-* The dynamic data displayed in the website can be different because the website may provide user interaction. 
+* What dynamic data display in the website can be changed in response to the user interaction. 
 
 * We need to automate the web browsing process in R for the dynamic data.
 
@@ -257,8 +257,8 @@ require("RSelenium")
 * Connect to a selenium server and open brower.
 
 \footnotesize
-```{r echo=TRUE, message=FALSE, warning=FALSE, results='hide'}
-rD <- rsDriver(port = 5560L, chromever = "85.0.4183.87")
+```{r eval=FALSE, message=FALSE, warning=FALSE, echo = TRUE}
+rD <- rsDriver(port = 5561L, chromever = "85.0.4183.87")
 remDr <- rD$client
 ```
 
@@ -267,15 +267,18 @@ remDr <- rD$client
 * Extract Information and organize data.
 
 \footnotesize
-```{r echo=TRUE, message=FALSE, warning=FALSE}
+```{r eval=FALSE, message=FALSE, warning=FALSE, echo = TRUE}
 url <- "http://www.flashscore.com/match/Cj6I5iL9/#match-statistics;0"
 remDr$navigate(url)
 webElem <- remDr$findElements(using = 'class', "statBox")
 webElem <- unlist(lapply(webElem, function(x){x$getElementText()}))[[1]]
-head(unlist(strsplit(webElem, split = '\n')))
+# head(unlist(strsplit(webElem, split = '\n')))
 remDr$close()
 ```
+![](figures/rselres.png)
 \normalsize
+
+
 
 ## Web Scraping for Dynamic Data in R
 
@@ -314,12 +317,14 @@ remDr$navigate(url)
 \footnotesize
 ```{r eval=FALSE, message=FALSE, warning=FALSE, echo = TRUE}
 repeat{
-  x <- try(webElemMore <- 
-             remDr$findElement(using = 'xpath', 
-                               '//*[@id="live-table"]/div[1]/div/div/a'),
-           silent=T)
-  if (inherits(x, "try-error")) break
-  webElemMore$clickElement()
+  b <- tryCatch({
+    suppressMessages({
+      webElemMore <- remDr$findElement(using = 'xpath', 
+                        '//*[@id="live-table"]/div[1]/div/div/a')
+      webElemMore$clickElement()
+    })
+  }, error = function(e) e)
+  if(inherits(b, "error")) break
 }
 ```
 \normalsize
@@ -405,7 +410,7 @@ remDr$close()
 
 ## Acknowledgement
 
-The slides are modified from [Dr. Kovalchik's material](https://github.com/skoval/UseRSportTutorial) and [Wanwan Xu's slides](https://github.com/wanwanx/WebScraping_UCSAS).
+This slides are modified from [Dr. Kovalchik's material](https://github.com/skoval/UseRSportTutorial) and [Wanwan Xu's slides](https://github.com/wanwanx/WebScraping_UCSAS).
 
 
 
